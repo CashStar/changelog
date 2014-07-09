@@ -67,7 +67,8 @@
                         hours_ago: 'hoursAgo',
                         until: same,
                         category: same,
-                        description: same
+                        description: same,
+                        details: same
                     },
                     field;
                 function set(key, scopeKey) {

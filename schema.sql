@@ -2,7 +2,8 @@ CREATE TABLE events (
     criticality INTEGER NOT NULL,
     unix_timestamp INTEGER NOT NULL,
     category VARCHAR NOT NULL,
-    description VARCHAR NOT NULL
+    description VARCHAR NOT NULL,
+    details TEXT
 );
 
 CREATE INDEX events_criticality_index on events(criticality);

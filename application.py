@@ -1,6 +1,6 @@
 import sqlite3
 import time
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask.ext.restful import reqparse, Api, Resource
 from raven.contrib.flask import Sentry
 
@@ -24,6 +24,7 @@ json_parser.add_argument('criticality', type=int, required=True, location='json'
 json_parser.add_argument('unix_timestamp', type=int, required=True, location='json')
 json_parser.add_argument('category', type=unicode, required=True, location='json')
 json_parser.add_argument('description', type=unicode, required=True, location='json')
+json_parser.add_argument('details', type=unicode, location='json', required=False)
 
 query_parser = reqparse.RequestParser()
 query_parser.add_argument('criticality', type=unicode)
@@ -31,6 +32,7 @@ query_parser.add_argument('hours_ago', type=float, required=True)
 query_parser.add_argument('until', type=int)
 query_parser.add_argument('category', type=unicode)
 query_parser.add_argument('description', type=unicode)
+query_parser.add_argument('details', type=unicode)
 
 
 class EventList(Resource):
@@ -67,9 +69,9 @@ class EventList(Resource):
         json = json_parser.parse_args()
         db = get_db()
         try:
-            db.execute('insert into events (criticality, unix_timestamp, description, category) '
-                       'VALUES (?, ?, ?, ?)',
-                       [json['criticality'], json['unix_timestamp'], json['description'], json['category']])
+            db.execute('insert into events (criticality, unix_timestamp, description, category, details) '
+                       'VALUES (?, ?, ?, ?, ?)',
+                       [json.get('criticality'), json.get('unix_timestamp'), json.get('description'), json.get('category'), json.get('details')])
         except sqlite3.IntegrityError:
             pass  # This happens if we try to add the same event multiple times
                   # Don't really care about that

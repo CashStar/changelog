@@ -20,6 +20,25 @@
 <script src="/static/js/changelog.services.js"></script>
 <script src="/static/js/changelog.directives.js"></script>
 <script src="/static/js/changelog.filters.js"></script>
+<script type="text/javascript">
+$(document).ready(
+    function (){
+        $("table").click(function(event) {
+
+              // No bubbling up
+            event.stopPropagation();
+
+            var $target = $(event.target);
+
+              // Open and close the appropriate thing
+            if ( $target.closest("td").attr("colspan") > 1 ) {
+                $target.closest("td").slideToggle(duration=100);
+            } else {
+                $target.closest("tr").next().find('td').slideToggle(duration=100);
+            }                    
+        });
+});
+</script>
 <div class="container-fluid">
     <div class="row" ng-controller="InputController">
         <form id="filters" class="form-horizontal">
@@ -137,11 +156,14 @@
             </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="event in events">
+                <tr ng-repeat-start="event in events">
                     <td>{{ event.criticality }}</td>
                     <td>{{ event.category }}</td>
                     <td>{{ event.unix_timestamp*1000|date:'yyyy-MM-dd HH:mm:ss' }}</td>
                     <td ng-bind-html="event.description|unsafeHtml"></td>
+                </tr>
+                <tr ng-repeat-end>
+                    <td hidden colspan=4><p ng-bind-html="event.details|unsafeHtml"></p></td>
                 </tr>
             </tbody>
         </table>
