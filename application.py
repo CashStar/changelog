@@ -42,7 +42,7 @@ events = Table('events', Base.metadata,
                Column('criticality', db.Integer, index=True),
                Column('unix_timestamp', db.Integer, index=True),
                Column('category', db.String(30), index=True),
-               Column('description', db.String(1000), index=True)
+               Column('description', db.String(1000), index=True),
 	       Column('details', db.Text)
                )
 Base.metadata.create_all(db.engine)
@@ -54,11 +54,12 @@ class Event(db.Model):
         'primary_key': [events.c.criticality, events.c.unix_timestamp,
                         events.c.category, events.c.description]
     }
-    def __init__(self, criticality, unix_timestamp, category, description):
+    def __init__(self, criticality, unix_timestamp, category, description, details=None):
         self.criticality = criticality
         self.unix_timestamp = unix_timestamp
         self.category = category
         self.description = description
+	self.details = details
 
 
 class EventList(Resource):

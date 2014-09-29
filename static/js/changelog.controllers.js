@@ -69,7 +69,7 @@
                         until: same,
                         category: same,
                         description: same,
-                        details: same
+                        details: same,
                         is_dashboard: 'isDashboard'
                     },
                     field,
