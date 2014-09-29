@@ -31,6 +31,7 @@
                 $scope.until = parseInt(state.until, 10) || -1;
                 $scope.category = checkboxList((state.category ? state.category.split(',') : []));
                 $scope.description = state.description || '';
+                $scope.isDashboard = parseInt(state.is_dashboard, 10) || 0;
                 if ($scope.until === -1) {
                     // ng-repeat doesn't work inside bs-radio-group, so we need to do generate the list with Jinja
                     // and do this manually
@@ -57,7 +58,7 @@
                 }
                 return $.param.fragment($location.absUrl(), permalinkState);
             }
-            $scope.updateState = function () {
+            $scope.updateState = function (forceUpdate) {
                 var newState = {},
                     state = $.bbq.getState(),
                     same = undefined,
@@ -69,12 +70,14 @@
                         category: same,
                         description: same,
                         details: same
+                        is_dashboard: 'isDashboard'
                     },
-                    field;
+                    field,
+                    shouldUpdate = !!forceUpdate;
                 function set(key, scopeKey) {
                     // Copy from $scope to newState if set, sorting and joining arrays
                     var value = $scope[scopeKey || key];
-                    if (value === undefined || value.length === 0) { return; }
+                    if (value === undefined || value.length === 0 || value === 0) { return; }
                     if (value instanceof Array) {
                         newState[key] = value.join(',');
                     } else {
@@ -87,17 +90,29 @@
                         set(field, fields[field]);
                     }
                 }
+                function maybeParseInt(field, v) {
+                    if (field === 'hours_ago' || field === 'until') {
+                        return parseInt(v, 10);
+                    }
+                    return v;
+                }
                 // Check state for change
                 for (field in fields) {
                     if (fields.hasOwnProperty(field)) {
-                        if (newState[field] !== state[field]) {
-                            // permalink should be down below in the $scope.$watch, but it fails to update the permalink
-                            // when a field is removed
-                            $scope.permalink = buildPermalink(newState);
-                            // state changed, return the new one
-                            return newState;
+                        var oldValue = maybeParseInt(field, state[field]),
+                            newValue = maybeParseInt(field, newState[field]);
+                        if (newValue !== oldValue) {
+                            shouldUpdate = true;
                         }
                     }
+                }
+
+                if (shouldUpdate) {
+                    // permalink should be down below in the $scope.$watch, but it fails to update the permalink
+                    // when a field is removed
+                    $scope.permalink = buildPermalink(newState);
+                    // state changed, return the new one
+                    return newState;
                 }
                 // No changes, return the original state
                 return state;
@@ -113,6 +128,7 @@
 
             // Initial load from hash when loading the page
             applyHash();
+            $scope.updateState(true);
 
             // Checkboxes -> list
             checkboxList($scope.criticality);
@@ -153,5 +169,24 @@
                 $scope.events = events;
                 $scope.loading = false;
             });
+        })
+
+        .controller('AutorefreshController', function ($scope, $interval, ChangelogApi) {
+            var refreshInterval = 10000,
+                stepGranularity = 100,
+                elapsed = 0,
+                intervalId;
+            $scope.percent = 0;
+            intervalId = $interval(function () {
+                elapsed += stepGranularity;
+                $scope.percent = (elapsed / refreshInterval) * 100;
+                if (elapsed >= refreshInterval) {
+                    if ($scope.isDashboard) {
+                        ChangelogApi.fetch($.bbq.getState());
+                    }
+                    elapsed = 0;
+                    $scope.percent = 0;
+                }
+            }, stepGranularity);
         });
 }());

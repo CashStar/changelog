@@ -1,5 +1,5 @@
 fieldset {
-    margin: 20px;
+    margin: 10px;
 }
 
 input[name=hours-ago] {
@@ -7,10 +7,23 @@ input[name=hours-ago] {
 }
 
 .category-container {
-    height: 140px;
+    height: 160px;
     overflow: scroll;
     border: 1px solid silver;
     padding: 3px
+}
+
+.autorefresh-progress {
+    height: 3px;
+    position: relative;
+}
+
+.autorefresh-progress > span {
+    display: block;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    background-color: red;
 }
 
 /* https://github.com/mgcrea/angular-strap/issues/398 */

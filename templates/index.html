@@ -41,7 +41,13 @@ $(document).ready(
 </script>
 <div class="container-fluid">
     <div class="row" ng-controller="InputController">
-        <form id="filters" class="form-horizontal">
+        <div ng-show="isDashboard">
+            <div class="autorefresh-progress" ng-controller="AutorefreshController">
+                <span ng-style="{width: percent + '%'}"></span>
+            </div>
+            {{ percent }}
+        </div>
+        <form id="filters" class="form-horizontal" ng-show="!isDashboard">
             <div class="col-md-2">
                 <fieldset>
                     <legend>Criticality</legend>
@@ -101,7 +107,6 @@ $(document).ready(
             <div class="col-md-2">
             <fieldset>
                     <legend>Categories</legend>
-                    <div>(You can scroll the list)</div>
                     <div class="controls category-container">
                         {% for current in categories %}
                         <div class="checkbox">
@@ -131,8 +136,9 @@ $(document).ready(
                 <fieldset>
                     <legend><a href="#" id="permalink" ng-href="{{ permalink }}">Permalink</a></legend>
                     <div>
-                        <pre id="permalink-code">{{ permalink }}</pre>
+                        <p id="permalink-code">{{ permalink }}</p>
                     </div>
+                    <button class="btn btn-default" ng-click="isDashboard = 1">Dashboard view</button>
                 </fieldset>
                 {% endraw %}
             </div>
